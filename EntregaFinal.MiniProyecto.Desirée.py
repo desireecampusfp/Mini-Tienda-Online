@@ -91,7 +91,6 @@ def generar_id(lista_items, clave_id): #Función
     return maximo_id + 1 #El nuevo ID será el máximo + 1, para garantizar que no se repita
         
 #Definición funciones: ARTÍCULOS.
-
 #Función - Crear artículos
 def crear_articulos(articulos): #Función 
     nombre_valido = False #Variable booleana. Nos sirve como condición de salida del bucle while.
@@ -176,6 +175,13 @@ def buscar_articulo_id(articulos): #Función.
     print(f"El artículo con ID {busqueda_id} no ha sido encontrado.\n")
     return None #Indica que no se encontró nada y la función finaliza. 
 
+#Función - Obtener artículo por ID
+def obtener_articulo_por_id(articulos, id_buscar): #Devuelve el diccionario o None. No interactivo.
+    for a in articulos:
+        if a["id"] == id_buscar:
+            return a
+        return None
+    
 #Función - Actualizar artículos (nombre, precio y stock)
 def actualizar_articulos(articulos): #Función.
     if len(articulos) == 0: #Devuelve cuántos elementos hay en la lista, si es igual a 0, está vacía.
@@ -321,6 +327,13 @@ def buscar_usuario_id(usuarios):
     print(f"El usuario con ID {busqueda_id} no ha sido encontrado.\n")
     return None #Si el bucle termina sin coincidencias, muestra el mensaje anterior y devuelve None.
 
+#Función - Obtener usuario por ID
+def obtener_usuario_por_id(usuarios, id_buscar): #Devuelve el diccionario o None
+    for u in usuarios:
+        if u["id"] == id_buscar:
+            return u
+        return None
+
 #Función actualizar usuario
 def actualizar_usuario(usuarios):
     if not lista_vacia(usuarios, "No hay usuarios registrados.\n"): #Si no hay usuarios, salimos
@@ -411,11 +424,11 @@ def añadir_articulos_carritos(articulos):
         if articulo_id == articulo["id"]: #Si el artículo ya está
             carrito_actual[i] = (articulo_id, cant + cantidad) #Sumamos cantidades
             existe_carrito = True #Marcamos si ya estaba
-        if existe_carrito == False: #Si no estaba en el carrito   
-            carrito_actual.append((articulo['id'], cantidad)) #Agregamos el artículo y cantidad como tupla
+    if existe_carrito == False: #Si no estaba en el carrito   
+        carrito_actual.append((articulo['id'], cantidad)) #Agregamos el artículo y cantidad como tupla
         
-        #Mostramos confirmación
-        print(f"Se añadieron {cantidad} ud(s). de '{articulo['nombre']}' al carrito de compra.\n")
+    #Mostramos confirmación
+    print(f"Se añadieron {cantidad} ud(s). de '{articulo['nombre']}' al carrito de compra.\n")
         
 def quitar_articulo_carrito():
     global carrito_actual #Elimina un artículo del carrito por ID si se encuentra
@@ -427,16 +440,16 @@ def quitar_articulo_carrito():
     if articulo is None: #Si no se encontró, salimos
         return
     
-    articulo_id = articulo["id"]
+    id_objetivo = articulo["id"]
     
     nuevo_carrito = [] #Creamos un nuevo carrito sin ese artículo
     eliminar = False
     
-    for articulo_id, cant in carrito_actual: #Recorremos las tuplas del carrito (id, cantidad)
-        if articulo_id == articulo_id: #Si coincide, lo marcamos para eliminar
+    for art_id, cant in carrito_actual: #Recorremos las tuplas del carrito (id, cantidad)
+        if art_id == id_objetivo: #Si coincide, lo marcamos para eliminar
             eliminar = True
         else:
-            nuevo_carrito.append((articulo_id, cant)) #Si no, lo conservamos
+            nuevo_carrito.append((art_id, cant)) #Si no, lo conservamos
             
     carrito_actual = nuevo_carrito #Reemplazamos el carrito anterior por el nuevo
     
@@ -452,7 +465,7 @@ def ver_carrito(articulos):
     
     total = 0
     for articulo_id, cant in carrito_actual: #Recorro tuplas (id, cantidad)
-        articulo = buscar_articulo_id(articulos, articulo_id) #Buscamos el artículo en la lista
+        articulo = obtener_articulo_por_id(articulos, articulo_id) #Buscamos el artículo en la lista
         if articulo is None: #Si el artículo fue borrado, continuamos
             continue
         subtotal = articulo["precio"] * cant #Precio unitario por cantidad
@@ -467,7 +480,7 @@ def confirmar_compra(articulos, usuarios, ventas): #Función
         print("Antes de comprar selecciona un usuario activo.\n")
         return
     
-    usuario = buscar_usuario_id(usuarios, usuario_activo) #Verificamos que existe
+    usuario = obtener_usuario_por_id(usuarios, usuario_activo) #Verificamos que existe
     if usuario is None or usuario["activo"] == False: #Verificamos que esté activo
         print("El usuario no existe o se encuentra inactivo.\n")
         return
@@ -522,17 +535,17 @@ def historial_ventas_usuario(usuarios, ventas, articulos): #Función
     if not lista_vacia(ventas, "No hay ventas registradas.\n"):
         return
     
-    usuario = buscar_usuario_id(usuarios) #Buscamos usuario por ID, si no existe, salimos
+    usuario = obtener_usuario_por_id(usuarios) #Buscamos usuario por ID, si no existe, salimos
     if usuario is None:
         return
     
     existen_ventas = False #Booleano para saber si hay ventas
     for v in ventas: #Recorremos la lista de ventas
-        if v["usuario id"] == usuario["id"]: #Si son del usuario
+        if v["usuario_id"] == usuario["id"]: #Si son del usuario
             existen_ventas = True #Sí hay
-            print(f"ID venta: {v["generar_id_ventas"]}, total: {v["total"]}€.\n")
+            print(f"ID venta: {v['id_venta']}, total: {v["total"]}€.\n")
             for (articulo_id, cant, precio_unidad) in v["items"]: #Recorremos las líneas de venta
-                articulo = buscar_articulo_id(articulos, articulo_id) #Intentamos obtener el artículo
+                articulo = obtener_articulo_por_id(articulos, articulo_id) #Intentamos obtener el artículo
                 
                 nombre = obtener_nombre_articulo(articulo, articulo_id) #Llamamos a la función buscar nombre artículo
                 print(f" - {nombre}: {cant} ud(s) x {precio_unidad}€.\n")
